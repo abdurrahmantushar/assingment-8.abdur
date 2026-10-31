@@ -60,6 +60,9 @@ export default function ProfilePage() {
       const { data: tokenData, error: tokenError } =
         await authClient.token();
 
+        console.log("JWT Token:", tokenData?.token);
+        console.log("Token Error:", tokenError);
+
       if (tokenError || !tokenData?.token) {
         throw new Error("Authentication token not found");
       }
