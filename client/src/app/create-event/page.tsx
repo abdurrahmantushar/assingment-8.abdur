@@ -13,6 +13,7 @@ import {
     Heart,
     ImagePlus,
     Leaf,
+    Loader2,
     MapPin,
     Sparkles,
     Users,
@@ -46,7 +47,7 @@ export default function CreateEventPage() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState("");
     const [today, setToday] = useState("");
-
+    const { data: session, isPending } = authClient.useSession();
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
@@ -59,6 +60,12 @@ export default function CreateEventPage() {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
+  if (!session?.user) {
+    toast.error("Please login to create an event");
+    router.replace("/auth/login");
+    return;
+}
+    
   if (!formData.category) {
     toast.error("Please select an event category");
     return;
@@ -157,7 +164,26 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       day: "2-digit",
     }).format(new Date())
   );
-}, []);
+    }, []);
+
+    useEffect(() => {
+        if (isPending) return;
+
+        if (!session?.user) {
+            router.replace("/auth/login");
+        }
+    }, [session, isPending, router]);
+
+    if (isPending || !session?.user) {
+    return (
+        <main className="flex min-h-screen items-center justify-center bg-[#f5f8f2] dark:bg-[#0b150e]">
+            <Loader2
+                size={34}
+                className="animate-spin text-green-700 dark:text-green-400"
+            />
+        </main>
+    );
+}
     return (
         <main className="min-h-screen bg-[#f5f8f2] px-4 py-8 dark:bg-[#0b150e] sm:px-6 sm:py-12">
             <div className="mx-auto max-w-[1600px]">
