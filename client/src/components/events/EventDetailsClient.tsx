@@ -63,6 +63,7 @@ export default function EventDetailsClient() {
   const [joining, setJoining] = useState(false);
   const [joined, setJoined] = useState(false);
   const [error, setError] = useState("");
+  const [checkingJoin, setCheckingJoin] = useState(true);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -93,6 +94,57 @@ export default function EventDetailsClient() {
       fetchEvent();
     }
   }, [id]);
+
+  useEffect(() => {
+  const checkJoinedStatus = async () => {
+    if (isPending) return;
+
+    if (!session?.user) {
+      setJoined(false);
+      setCheckingJoin(false);
+      return;
+    }
+
+    try {
+      setCheckingJoin(true);
+
+      const { data: tokenData, error: tokenError } =
+        await authClient.token();
+
+      if (tokenError || !tokenData?.token) return;
+
+      const response = await fetch(`${API_URL}/api/joins/my-events`, {
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+        },
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to check joined status");
+      }
+
+      const joinedEvents = data.joinedEvents || [];
+
+      const alreadyJoined = joinedEvents.some(
+        (item: any) =>
+          String(item.eventId || item.event?._id) === String(id)
+      );
+
+      setJoined(alreadyJoined);
+    } catch (error) {
+      console.error("Failed to check joined status:", error);
+    } finally {
+      setCheckingJoin(false);
+    }
+  };
+
+  if (id) {
+    checkJoinedStatus();
+  }
+}, [id, session, isPending]);
 
   const handleJoin = async () => {
     if (!session?.user) {
@@ -388,20 +440,22 @@ export default function EventDetailsClient() {
 
                 <div className="my-6 border-t border-gray-100 dark:border-white/10" />
 
-                <button
-                  onClick={handleJoin}
-                  disabled={joining || joined || isFull}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-400"
-                >
-                  <Heart size={18} />
-                  {joining
+              <button
+                onClick={handleJoin}
+                disabled={joining || joined || isFull || checkingJoin}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Heart size={18} />
+                {checkingJoin
+                  ? "Checking..."
+                  : joining
                     ? "Joining..."
                     : joined
-                      ? "Joined Successfully"
+                      ? "Already Joined"
                       : isFull
                         ? "Event Full"
                         : "Join This Event"}
-                </button>
+              </button>
 
                 <button
                   onClick={handleShare}
