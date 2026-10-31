@@ -47,7 +47,7 @@ export const verifyJWT = async (
       typeof payload.sub !== "string" ||
       typeof payload.email !== "string" ||
       typeof payload.name !== "string" ||
-      typeof payload.role !== "string"
+      typeof payload.role !== "string" 
     ) {
       res.status(401).json({
         success: false,
