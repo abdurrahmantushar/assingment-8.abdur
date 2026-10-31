@@ -53,6 +53,39 @@ app.get("/api/protected", verifyJWT, (req: AuthRequest, res) => {
   });
 });
 
+app.post(
+  "/api/profile/upload",
+  verifyJWT,
+  upload.single("image"),
+  async (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({
+          success: false,
+          message: "Profile image is required",
+        });
+        return;
+      }
+
+      const imageResult = await uploadImageCloude(req.file);
+
+      res.status(200).json({
+        success: true,
+        message: "Profile image uploaded successfully",
+        image: imageResult.secure_url,
+        imagePublicId: imageResult.public_id,
+      });
+    } catch (error) {
+      console.error("Profile image upload error:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to upload profile image",
+      });
+    }
+  }
+);
+
 app.get(
   "/api/admin",
   verifyJWT,
@@ -186,8 +219,7 @@ app.get("/api/events/:id", async (req, res) => {
   }
 });
 
-app.patch(
-  "/api/events/:id",
+app.patch("/api/events/:id",
   verifyJWT,
   verifyAdmin,
   upload.single("image"),
@@ -422,7 +454,6 @@ app.delete("/api/events/:id", verifyJWT, verifyAdmin, async (req: AuthRequest, r
     });
   }
 });
-
 
 app.post("/api/events",
   verifyJWT,
