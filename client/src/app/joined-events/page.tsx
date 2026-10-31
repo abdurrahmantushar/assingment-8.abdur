@@ -149,7 +149,7 @@ export default function JoinedEventsPage() {
           </p>
 
           <Link
-            href="/login"
+            href="/auth/login"
             className="mt-6 inline-flex rounded-xl bg-green-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-800"
           >
             Login Now

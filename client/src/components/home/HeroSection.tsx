@@ -1,3 +1,4 @@
+'use client'
 
 import Link from "next/link";
 import {
@@ -9,7 +10,7 @@ import {
   Users,
   HandHeart,
 } from "lucide-react";
-
+import { authClient } from "@/lib/auth-client";
 const impactStats = [
   {
     icon: Users,
@@ -28,7 +29,9 @@ const impactStats = [
   },
 ];
 
+
 export default function HeroSection() {
+    const { data: session, isPending } = authClient.useSession();
   return (
     <section className="relative overflow-hidden bg-background">
       <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
@@ -69,13 +72,15 @@ export default function HeroSection() {
               />
             </Link>
 
-            <Link
-              href="/auth/register"
-              className="inline-flex items-center justify-center gap-3 rounded-xl border border-border bg-card px-7 py-4 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
-            >
-              <HeartHandshake size={19} />
-              Become a Volunteer
-            </Link>
+            {!isPending && !session?.user && (
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center justify-center gap-3 rounded-xl border border-border bg-card px-7 py-4 text-sm font-bold text-foreground transition hover:border-primary hover:text-primary"
+              >
+                <HeartHandshake size={19} />
+                Become a Volunteer
+              </Link>
+            )}
           </div>
 
           <div className="mt-12 grid grid-cols-3 gap-4 border-t border-border pt-8">
