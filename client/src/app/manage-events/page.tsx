@@ -18,8 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { authClient } from "@/lib/auth-client";
-
+import { authClient, type SessionUser } from "@/lib/auth-client";
 type Event = {
   _id: string;
   title: string;
@@ -30,6 +29,7 @@ type Event = {
   joinedCount: number;
   image: string;
   description: string;
+
 };
 
 const categories = [
@@ -99,16 +99,23 @@ export default function ManageEventsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (isPending) return;
+useEffect(() => {
+  if (isPending) return;
 
-    if (!session?.user) {
-      router.replace("/login");
-      return;
-    }
+  if (!session?.user) {
+    router.replace("/auth/login");
+    return;
+  }
 
-    fetchEvents();
-  }, [session, isPending, router, fetchEvents]);
+  const user = session.user as SessionUser;
+
+  if (user.role !== "admin") {
+    router.replace("/");
+    return;
+  }
+
+  fetchEvents();
+}, [session, isPending, router, fetchEvents]);;
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {

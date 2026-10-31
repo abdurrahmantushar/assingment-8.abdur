@@ -8,3 +8,7 @@ export const authClient = createAuthClient({
     credentials: "include",
   },
 });
+
+export type SessionUser = typeof authClient.$Infer.Session.user & {
+  role: string;
+};

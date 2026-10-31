@@ -123,6 +123,8 @@ export default function Navbar() {
           Add Event
         </Link>
       )}
+      {
+        isAdmin && (
 
       <Link
         href="/manage-events"
@@ -134,6 +136,8 @@ export default function Navbar() {
         <CalendarDays size={18} />
         Manage Events
       </Link>
+        )
+      }
 
       <Link
         href="/joined-events"
@@ -328,22 +332,22 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
-<button
-  type="button"
-  onClick={toggleTheme}
-  aria-label="Toggle theme"
-  className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300"
->
-  {mounted ? (
-    resolvedTheme === "dark" ? (
-      <Sun size={19} />
-    ) : (
-      <Moon size={19} />
-    )
-  ) : (
-    <span className="block h-[19px] w-[19px]" />
-  )}
-</button>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300"
+        >
+          {mounted ? (
+            resolvedTheme === "dark" ? (
+              <Sun size={19} />
+            ) : (
+              <Moon size={19} />
+            )
+          ) : (
+            <span className="block h-[19px] w-[19px]" />
+          )}
+        </button>
 
             <button
               type="button"
