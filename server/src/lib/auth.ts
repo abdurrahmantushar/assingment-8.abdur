@@ -23,11 +23,11 @@ export const auth = betterAuth({
     process.env.CLIENT_URL || "http://localhost:3000",
   ],
 
-  user:{
-    additionalFields:{
+  user: {
+    additionalFields: {
       role: {
         type: "string",
-        required : false,
+        required: false,
         defaultValue: 'user',
         input: false
       }
@@ -35,7 +35,7 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-     minPasswordLength: 8,
+    minPasswordLength: 8,
   },
 
   plugins: [
@@ -53,4 +53,11 @@ export const auth = betterAuth({
       },
     }),
   ],
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    },
+  },
 });
