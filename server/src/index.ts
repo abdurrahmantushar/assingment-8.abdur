@@ -169,6 +169,40 @@ app.get("/api/stats", async (req, res) => {
   }
 });
 
+app.get("/api/gallery", async (req, res) => {
+  try {
+    const db = getDB();
+
+    const galleryImages = await db
+      .collection("events")
+      .find({
+        image: { $exists: true, $ne: "" },
+      })
+      .project({
+        title: 1,
+        category: 1,
+        image: 1,
+        createdAt: 1,
+      })
+      .sort({ createdAt: -1 })
+      .limit(12)
+      .toArray();
+
+    res.status(200).json({
+      success: true,
+      total: galleryImages.length,
+      galleryImages,
+    });
+  } catch (error) {
+    console.error("Fetch gallery error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch gallery images",
+    });
+  }
+});
+
 app.get("/api/events", async (req, res) => {
   try {
     const db = getDB();
