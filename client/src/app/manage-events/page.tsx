@@ -15,8 +15,19 @@ import {
   Plus,
   ArrowUpRight,
   X,
-  Loader2,
+  Loader2, AlertTriangle
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { toast } from "react-hot-toast";
 import { authClient, type SessionUser } from "@/lib/auth-client";
 type Event = {
@@ -63,6 +74,8 @@ export default function ManageEventsPage() {
   const [deletingId, setDeletingId] = useState("");
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -99,23 +112,23 @@ export default function ManageEventsPage() {
     }
   }, []);
 
-useEffect(() => {
-  if (isPending) return;
+  useEffect(() => {
+    if (isPending) return;
 
-  if (!session?.user) {
-    router.replace("/auth/login");
-    return;
-  }
+    if (!session?.user) {
+      router.replace("/auth/login");
+      return;
+    }
 
-  const user = session.user as SessionUser;
+    const user = session.user as SessionUser;
 
-  if (user.role !== "admin") {
-    router.replace("/");
-    return;
-  }
+    if (user.role !== "admin") {
+      router.replace("/");
+      return;
+    }
 
-  fetchEvents();
-}, [session, isPending, router, fetchEvents]);;
+    fetchEvents();
+  }, [session, isPending, router, fetchEvents]);;
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -132,12 +145,10 @@ useEffect(() => {
     });
   }, [events, search, activeCategory]);
 
-  const handleDelete = async (id: string) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this event? This action cannot be undone."
-    );
+  const handleDelete = async () => {
+    if (!selectedEventId) return;
 
-    if (!confirmed) return;
+    const id = selectedEventId;
 
     try {
       setDeletingId(id);
@@ -167,6 +178,8 @@ useEffect(() => {
       );
 
       toast.success("Event deleted successfully");
+      setDeleteDialogOpen(false);
+      setSelectedEventId(null);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to delete event"
@@ -350,11 +363,10 @@ useEffect(() => {
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-                  activeCategory === category
-                    ? "bg-green-700 text-white shadow-md shadow-green-900/10"
-                    : "border border-gray-200 bg-white text-gray-600 hover:border-green-300 hover:text-green-700 dark:border-white/10 dark:bg-[#172117] dark:text-gray-300 dark:hover:text-green-400"
-                }`}
+                className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all ${activeCategory === category
+                  ? "bg-green-700 text-white shadow-md shadow-green-900/10"
+                  : "border border-gray-200 bg-white text-gray-600 hover:border-green-300 hover:text-green-700 dark:border-white/10 dark:bg-[#172117] dark:text-gray-300 dark:hover:text-green-400"
+                  }`}
               >
                 {category}
               </button>
@@ -452,26 +464,36 @@ useEffect(() => {
                       </div>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="mt-4 grid grid-cols-2 gap-3">
                       <button
+                        type="button"
                         onClick={() => setEditingEvent(event)}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 text-xs font-semibold text-green-700 transition hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/60"
+                        title="Edit event"
+                        aria-label="Edit event"
+                        className="group flex h-11 w-full items-center justify-center rounded-xl border border-green-100 bg-green-50 text-green-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-600 hover:text-white hover:shadow-lg hover:shadow-green-500/20 active:translate-y-0 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400 dark:hover:border-green-500 dark:hover:bg-green-600 dark:hover:text-white"
                       >
-                        <Pencil size={14} />
-                        Edit
+                        <Pencil
+                          size={17}
+                          strokeWidth={2}
+                          className="transition-transform duration-200 group-hover:scale-110"
+                        />
                       </button>
 
                       <button
-                        onClick={() => handleDelete(event._id)}
-                        disabled={deletingId === event._id}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 text-xs font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40"
+                        type="button"
+                        onClick={() => {
+                          setSelectedEventId(event._id);
+                          setDeleteDialogOpen(true);
+                        }}
+                        title="Delete event"
+                        aria-label="Delete event"
+                        className="group flex h-11 w-full items-center justify-center rounded-xl border border-red-100 bg-red-50 text-red-500 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/20 active:translate-y-0 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:border-red-500 dark:hover:bg-red-500 dark:hover:text-white"
                       >
-                        {deletingId === event._id ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={14} />
-                        )}
-                        Delete
+                        <Trash2
+                          size={17}
+                          strokeWidth={2}
+                          className="transition-transform duration-200 group-hover:scale-110"
+                        />
                       </button>
                     </div>
                   </div>
@@ -651,6 +673,56 @@ useEffect(() => {
           </div>
         </div>
       )}
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!deletingId) {
+            setDeleteDialogOpen(open);
+
+            if (!open) {
+              setSelectedEventId(null);
+            }
+          }
+        }}
+      >
+        <AlertDialogContent className="max-w-md rounded-2xl border-gray-100 dark:border-white/10 dark:bg-[#142018]">
+          <AlertDialogHeader>
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+              <AlertTriangle size={23} />
+            </div>
+
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+              Delete this event?
+            </AlertDialogTitle>
+
+            <AlertDialogDescription className="text-sm leading-6 text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete this event? This action cannot be
+              undone, and related registrations will also be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="mt-3 gap-2">
+            <AlertDialogCancel
+              disabled={!!deletingId}
+              className="rounded-xl dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+            >
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={!!deletingId || !selectedEventId}
+              className="rounded-xl bg-red-600 text-white hover:bg-red-700"
+            >
+              <Trash2 size={16} className="mr-2" />
+              {deletingId ? "Deleting..." : "Delete Event"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
