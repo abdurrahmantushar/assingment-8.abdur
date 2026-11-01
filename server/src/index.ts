@@ -99,6 +99,76 @@ app.get(
   }
 );
 
+app.get("/api/stats", async (req, res) => {
+  try {
+    const db = getDB();
+    const now = new Date();
+
+    const [activeVolunteers, eventStats] = await Promise.all([
+      db.collection("joinedEvents").distinct("userId"),
+
+      db.collection("events").aggregate([
+        {
+          $match: {
+            date: { $gt: now },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalEvents: { $sum: 1 },
+            locations: {
+              $addToSet: {
+                $toLower: {
+                  $trim: {
+                    input: "$location",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalEvents: 1,
+            totalCommunities: {
+              $size: {
+                $filter: {
+                  input: "$locations",
+                  as: "location",
+                  cond: { $ne: ["$$location", ""] },
+                },
+              },
+            },
+          },
+        },
+      ]).toArray(),
+    ]);
+
+    const stats = eventStats[0] || {
+      totalEvents: 0,
+      totalCommunities: 0,
+    };
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        activeVolunteers: activeVolunteers.length,
+        communityEvents: stats.totalEvents,
+        localCommunities: stats.totalCommunities,
+      },
+    });
+  } catch (error) {
+    console.error("Fetch stats error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch statistics",
+    });
+  }
+});
+
 app.get("/api/events", async (req, res) => {
   try {
     const db = getDB();
