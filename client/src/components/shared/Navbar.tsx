@@ -109,59 +109,53 @@ export default function Navbar() {
     setProfileMenuOpen(false);
   };
 
-  const ProfileLinks = ({ mobile = false }: { mobile?: boolean }) => (
-    <>
-      {isAdmin && (
-        <Link
-          href="/create-event"
-          onClick={closeMenus}
-          className={`flex items-center gap-3 rounded-xl font-semibold text-green-700 transition hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950/50 ${
-            mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
-          }`}
-        >
-          <Plus size={18} />
-          Add Event
-        </Link>
-      )}
-      {
-        isAdmin && (
+const ProfileLinks = ({ mobile = false }: { mobile?: boolean }) => (
+  <>
+    <Link
+      href="/create-event"
+      onClick={closeMenus}
+      className={`flex items-center gap-3 rounded-xl font-semibold text-green-700 transition hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950/50 ${
+        mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
+      }`}
+    >
+      <Plus size={18} />
+      Add Event
+    </Link>
 
-      <Link
-        href="/manage-events"
-        onClick={closeMenus}
-        className={`flex items-center gap-3 rounded-xl text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 ${
-          mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
-        }`}
-      >
-        <CalendarDays size={18} />
-        Manage Events
-      </Link>
-        )
-      }
+    <Link
+      href="/manage-events"
+      onClick={closeMenus}
+      className={`flex items-center gap-3 rounded-xl text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 ${
+        mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
+      }`}
+    >
+      <CalendarDays size={18} />
+      Manage Events
+    </Link>
 
-      <Link
-        href="/joined-events"
-        onClick={closeMenus}
-        className={`flex items-center gap-3 rounded-xl text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 ${
-          mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
-        }`}
-      >
-        <Users size={18} />
-        Joined Events
-      </Link>
+    <Link
+      href="/joined-events"
+      onClick={closeMenus}
+      className={`flex items-center gap-3 rounded-xl text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 ${
+        mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
+      }`}
+    >
+      <Users size={18} />
+      Joined Events
+    </Link>
 
-      <Link
-        href="/profile"
-        onClick={closeMenus}
-        className={`flex items-center gap-3 rounded-xl text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 ${
-          mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
-        }`}
-      >
-        <UserRound size={18} />
-        My Profile
-      </Link>
-    </>
-  );
+    <Link
+      href="/profile"
+      onClick={closeMenus}
+      className={`flex items-center gap-3 rounded-xl text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 ${
+        mobile ? "px-4 py-3 text-sm" : "px-3 py-2.5 text-sm"
+      }`}
+    >
+      <UserRound size={18} />
+      My Profile
+    </Link>
+  </>
+);
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-xl dark:border-gray-800 dark:bg-gray-950/95">
@@ -206,20 +200,18 @@ export default function Navbar() {
             );
           })}
 
-          {isAdmin && (
-            <Link
-              href="/create-event"
-              onClick={closeMenus}
-              className={`relative flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-medium transition ${
-                pathname === "/create-event"
-                  ? "bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-green-700 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:text-green-400"
-              }`}
-            >
-              <Plus size={17} />
-              Add Event
-            </Link>
-          )}
+          <Link
+            href="/create-event"
+            onClick={closeMenus}
+            className={`relative flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-sm font-medium transition ${
+              pathname === "/create-event"
+                ? "bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400"
+                : "text-gray-600 hover:bg-gray-50 hover:text-green-700 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:text-green-400"
+            }`}
+          >
+            <Plus size={17} />
+            Add Event
+          </Link>
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">

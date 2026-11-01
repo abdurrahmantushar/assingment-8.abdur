@@ -256,7 +256,7 @@ app.get("/api/events/recent", async (req, res) => {
   }
 });
 
-app.get("/api/events/my-events", verifyJWT, verifyAdmin, async (req: AuthRequest, res) => {
+app.get("/api/events/my-events", verifyJWT, async (req: AuthRequest, res) => {
   try {
     const db = getDB();
 
@@ -325,7 +325,6 @@ app.get("/api/events/:id", async (req, res) => {
 
 app.patch("/api/events/:id",
   verifyJWT,
-  verifyAdmin,
   upload.single("image"),
   async (req: AuthRequest, res) => {
     try {
@@ -491,7 +490,7 @@ app.patch("/api/events/:id",
   }
 );
 
-app.delete("/api/events/:id", verifyJWT, verifyAdmin, async (req: AuthRequest, res) => {
+app.delete("/api/events/:id", verifyJWT, async (req: AuthRequest, res) => {
   try {
 
     const id = req.params.id;
@@ -561,7 +560,6 @@ app.delete("/api/events/:id", verifyJWT, verifyAdmin, async (req: AuthRequest, r
 
 app.post("/api/events",
   verifyJWT,
-  verifyAdmin,
   upload.single("image"),
   async (req: AuthRequest, res) => {
     try {

@@ -9,6 +9,7 @@ import {
     ArrowRight,
     CalendarDays,
     CheckCircle2,
+    ChevronDown,
     Clock3,
     Heart,
     ImagePlus,
@@ -59,7 +60,7 @@ export default function CreateEventPage() {
 
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-
+    if (loading) return;
   if (!session?.user) {
     toast.error("Please login to create an event");
     router.replace("/auth/login");
@@ -174,6 +175,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         }
     }, [session, isPending, router]);
 
+    useEffect(() => {
+  return () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+  };
+    }, [imagePreview]);
+
     if (isPending || !session?.user) {
     return (
         <main className="flex min-h-screen items-center justify-center bg-[#f5f8f2] dark:bg-[#0b150e]">
@@ -271,39 +280,38 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                                 </p>
                             </div>
 
-                            <div>
-                                <label className={labelClass}>Choose a Category *</label>
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                    {categories.map((category) => {
-                                        const active = formData.category === category.name;
+<div>
+    <label className={labelClass}>Choose a Category *</label>
 
-                                        return (
-                                            <button
-                                                key={category.name}
-                                                type="button"
-                                                onClick={() =>
-                                                    setFormData((prev) => ({
-                                                        ...prev,
-                                                        category: category.name,
-                                                    }))
-                                                }
-                                                className={`rounded-xl border p-3 text-left transition ${active
-                                                        ? "border-green-600 bg-green-50 ring-2 ring-green-600/10 dark:border-green-500 dark:bg-green-500/10"
-                                                        : "border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/50 dark:border-white/10 dark:bg-[#17251a] dark:hover:bg-green-500/5"
-                                                    }`}
-                                            >
-                                                <span className="text-2xl">{category.icon}</span>
-                                                <span className="mt-2 block text-xs font-bold text-gray-800 dark:text-gray-100">
-                                                    {category.name}
-                                                </span>
-                                                <span className="mt-1 block text-[10px] leading-4 text-gray-400">
-                                                    {category.description}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+    <div className="relative">
+        <select
+            value={formData.category}
+            onChange={(e) =>
+                setFormData((prev) => ({
+                    ...prev,
+                    category: e.target.value,
+                }))
+            }
+            required
+            className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3.5 pr-11 text-sm font-medium text-gray-800 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-600/10 dark:border-white/10 dark:bg-[#17251a] dark:text-gray-100 dark:focus:border-green-500"
+        >
+            <option value="" disabled>
+                Select a category
+            </option>
+
+            {categories.map((category) => (
+                <option key={category.name} value={category.name}>
+                    {category.icon} {category.name}
+                </option>
+            ))}
+        </select>
+
+        <ChevronDown
+            size={18}
+            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+        />
+    </div>
+</div>
 
                             <div>
                                 <label className={labelClass}>About This Event *</label>

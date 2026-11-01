@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { toast } from "react-hot-toast";
-import { authClient, type SessionUser } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 type Event = {
   _id: string;
   title: string;
@@ -120,15 +120,8 @@ export default function ManageEventsPage() {
       return;
     }
 
-    const user = session.user as SessionUser;
-
-    if (user.role !== "admin") {
-      router.replace("/");
-      return;
-    }
-
     fetchEvents();
-  }, [session, isPending, router, fetchEvents]);;
+  }, [session, isPending, router, fetchEvents]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
