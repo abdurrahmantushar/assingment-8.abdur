@@ -1,10 +1,11 @@
-import { betterAuth, roblox } from "better-auth";
+import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { jwt } from "better-auth/plugins";
 import { getDB } from "../config/db.js";
 
 const secret = process.env.BETTER_AUTH_SECRET;
 const baseURL = process.env.BETTER_AUTH_URL;
+const clientURL = process.env.CLIENT_URL || "http://localhost:3000";
 
 if (!secret || secret.length < 32) {
   throw new Error("BETTER_AUTH_SECRET must be at least 32 characters");
@@ -16,23 +17,23 @@ if (!baseURL) {
 
 export const auth = betterAuth({
   database: mongodbAdapter(getDB()),
+
   baseURL,
   secret,
 
-  trustedOrigins: [
-    process.env.CLIENT_URL || "http://localhost:3000",
-  ],
+  trustedOrigins: [clientURL],
 
   user: {
     additionalFields: {
       role: {
         type: "string",
         required: false,
-        defaultValue: 'user',
-        input: false
-      }
-    }
+        defaultValue: "user",
+        input: false,
+      },
+    },
   },
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -44,8 +45,9 @@ export const auth = betterAuth({
         issuer: baseURL,
         audience: baseURL,
         expirationTime: "15m",
+
         definePayload: ({ user }) => ({
-          id: user.id,
+          sub: user.id,
           email: user.email,
           name: user.name,
           role: user.role || "user",
@@ -53,6 +55,7 @@ export const auth = betterAuth({
       },
     }),
   ],
+
   advanced: {
     defaultCookieAttributes: {
       sameSite: "none",
