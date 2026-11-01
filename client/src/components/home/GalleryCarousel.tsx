@@ -1,100 +1,141 @@
+
 "use client";
 
+import { useEffect, useState } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const galleryImages = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=500&q=85",
-    title: "Tree Plantation",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=500&q=85",
-    title: "Community Volunteering",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=500&q=85",
-    title: "Community Cleanup",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=500&q=85",
-    title: "Food Donation",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=500&q=85",
-    title: "Helping People",
-  },
-  {
-    id: 6,
-    image:
-      "https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=500&q=85",
-    title: "Education Support",
-  },
-];
+type GalleryImage = {
+  _id: string;
+  image: string;
+  title: string;
+  category: string;
+};
 
 export default function GalleryCarousel() {
-  const scrollGallery = (direction: "left" | "right") => {
-    document.getElementById("impact-gallery")?.scrollBy({
-      left: direction === "right" ? 300 : -300,
-      behavior: "smooth",
-    });
-  };
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const API_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+        const response = await fetch(`${API_URL}/api/gallery`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch gallery");
+        }
+
+        setGalleryImages(data.galleryImages || []);
+      } catch (error) {
+        console.error("Gallery fetch error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGallery();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex gap-3 overflow-hidden">
+        {[1, 2, 3, 4, 5, 6].map((item) => (
+          <div
+            key={item}
+            className="h-28 min-w-[75%] animate-pulse rounded-xl bg-secondary sm:h-32 sm:min-w-[32%] lg:min-w-[calc((100%-60px)/6)]"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (galleryImages.length === 0) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        No gallery images available yet.
+      </p>
+    );
+  }
 
   return (
     <div>
-      <div className="mb-4 hidden items-center gap-2 sm:flex">
+      <div className="mb-5 flex items-center justify-end gap-3">
         <button
           type="button"
           aria-label="Previous gallery images"
-          onClick={() => scrollGallery("left")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-green-600 hover:bg-green-50 hover:text-green-700 dark:border-white/10 dark:text-gray-300 dark:hover:bg-green-500/10"
+          onClick={() => carouselApi?.scrollPrev()}
+          disabled={!carouselApi?.canScrollPrev()}
+          className="group flex h-11 w-11 items-center justify-center rounded-xl border border-primary/15 bg-card text-foreground shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft
+            size={20}
+            strokeWidth={2.2}
+            className="transition-transform duration-300 group-hover:-translate-x-0.5"
+          />
         </button>
 
         <button
           type="button"
           aria-label="Next gallery images"
-          onClick={() => scrollGallery("right")}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-green-600 hover:bg-green-50 hover:text-green-700 dark:border-white/10 dark:text-gray-300 dark:hover:bg-green-500/10"
+          onClick={() => carouselApi?.scrollNext()}
+          disabled={!carouselApi?.canScrollNext()}
+          className="group flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all duration-300 hover:-translate-y-1 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
         >
-          <ChevronRight size={18} />
+          <ChevronRight
+            size={20}
+            strokeWidth={2.2}
+            className="transition-transform duration-300 group-hover:translate-x-0.5"
+          />
         </button>
       </div>
 
-      <div
-        id="impact-gallery"
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      <Carousel
+        setApi={setCarouselApi}
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
       >
-        {galleryImages.map((item) => (
-          <div
-            key={item.id}
-            className="group relative h-28 min-w-[75%] snap-start overflow-hidden rounded-xl sm:h-32 sm:min-w-[32%] lg:min-w-[calc((100%-60px)/6)]"
-          >
-            <img
-              src={item.image}
-              alt={item.title}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
+        <CarouselContent className="-ml-3">
+          {galleryImages.map((item) => (
+            <CarouselItem
+              key={item._id}
+              className="basis-[75%] pl-3 sm:basis-1/3 lg:basis-1/6"
+            >
+              <div className="group relative h-28 overflow-hidden rounded-xl sm:h-32">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-            <p className="absolute bottom-3 left-3 translate-y-2 text-xs font-semibold text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-              {item.title}
-            </p>
-          </div>
-        ))}
-      </div>
+                <div className="absolute bottom-3 left-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                  <p className="text-xs font-semibold text-white">
+                    {item.title}
+                  </p>
+                  <p className="mt-1 text-[10px] text-white/80">
+                    {item.category}
+                  </p>
+                </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   );
 }
