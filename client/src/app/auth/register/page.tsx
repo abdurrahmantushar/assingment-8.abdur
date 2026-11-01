@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
+  Globe,
   Heart,
   Leaf,
   LockKeyhole,
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { data: session, isPending } = authClient.useSession();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -96,14 +98,31 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: `${window.location.origin}/`,
+        errorCallbackURL: `${window.location.origin}/auth/login`,
+      });
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      toast.error("Google sign in failed.");
+      setGoogleLoading(false);
+    }
+  };
+
   const inputClass =
     "w-full rounded-xl border border-gray-200 bg-[#f9fbf8] py-3.5 pl-11 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 dark:border-white/10 dark:bg-[#17251a] dark:text-white dark:focus:bg-[#1b2b1f]";
 
-  useEffect(() => {
-    if (!isPending && session?.user) {
-      router.replace("/");
-    }
-  }, [session, isPending, router]);
+    useEffect(() => {
+      if (!isPending && session?.user) {
+        router.replace("/");
+        router.refresh();
+      }
+    }, [session, isPending, router]);
 
   if (isPending || session?.user) {
     return (
@@ -364,7 +383,23 @@ export default function RegisterPage() {
                 {!loading && <ArrowRight size={17} />}
               </button>
             </form>
+            <div className="my-6 flex items-center gap-4">
+              <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
+              <span className="text-xs font-medium text-gray-400">
+                OR CONTINUE WITH
+              </span>
+              <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
+            </div>
 
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading || loading}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-3.5 text-sm font-semibold text-gray-700 transition hover:border-green-300 hover:bg-green-50/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#17251a] dark:text-gray-200 dark:hover:bg-green-500/5"
+            >
+              <Globe size={19} />
+              {googleLoading ? "Connecting to Google..." : "Continue with Google"}
+            </button>
             <p className="mt-7 text-center text-sm text-gray-500 dark:text-gray-400">
               Already have an account?{" "}
               <Link
