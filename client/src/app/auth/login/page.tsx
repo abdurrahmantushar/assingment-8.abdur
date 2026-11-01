@@ -8,6 +8,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  Globe,
   Heart,
   Leaf,
   LockKeyhole,
@@ -25,6 +26,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const { data: session, isPending } = authClient.useSession();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -73,20 +75,37 @@ export default function LoginPage() {
     }
   };
 
-  const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-[#f9fbf8] py-3.5 pl-11 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 dark:border-white/10 dark:bg-[#17251a] dark:text-white dark:focus:bg-[#1b2b1f]";
-  useEffect(() => {
-  if (!isPending && session?.user) {
-    router.replace("/");
+const handleGoogleSignIn = async () => {
+  try {
+    setGoogleLoading(true);
+
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: `${window.location.origin}/`,
+      errorCallbackURL: `${window.location.origin}/auth/login`,
+    });
+  } catch (error) {
+    console.error("Google sign in error:", error);
+    toast.error("Google sign in failed.");
+    setGoogleLoading(false);
   }
-}, [session, isPending, router]);
+};
+
+  const inputClass = "w-full rounded-xl border border-gray-200 bg-[#f9fbf8] py-3.5 pl-11 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 dark:border-white/10 dark:bg-[#17251a] dark:text-white dark:focus:bg-[#1b2b1f]";
+
+    useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/");
+      router.refresh();
+    }
+  }, [session, isPending, router]);
 
   if (isPending || session?.user) {
-  return (
-    <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[#f5f8f2] dark:bg-[#0b150e]">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-700 border-t-transparent" />
-    </main>
-  );
+    return (
+      <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[#f5f8f2] dark:bg-[#0b150e]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-700 border-t-transparent" />
+      </main>
+    );
   }
   return (
     <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[#f5f8f2] px-4 py-10 dark:bg-[#0b150e] sm:px-6">
@@ -252,7 +271,23 @@ export default function LoginPage() {
                 {!loading && <ArrowRight size={17} />}
               </button>
             </form>
+            <div className="my-6 flex items-center gap-4">
+              <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
+              <span className="text-xs font-medium text-gray-400">
+                OR CONTINUE WITH
+              </span>
+              <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
+            </div>
 
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading || loading}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-3.5 text-sm font-semibold text-gray-700 transition hover:border-green-300 hover:bg-green-50/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#17251a] dark:text-gray-200 dark:hover:bg-green-500/5"
+            >
+              <Globe size={19} />
+              {googleLoading ? "Connecting to Google..." : "Continue with Google"}
+            </button>
             <div className="my-7 flex items-center gap-4">
               <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
 
@@ -262,70 +297,70 @@ export default function LoginPage() {
 
               <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
             </div>
-                    <div className="my-6 rounded-2xl border border-green-200 bg-green-50/80 p-4 dark:border-green-500/20 dark:bg-green-500/5">
-  <div className="mb-3 flex items-center gap-2">
-    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-700 text-white">
-      <ShieldCheck size={18} />
-    </div>
+            <div className="my-6 rounded-2xl border border-green-200 bg-green-50/80 p-4 dark:border-green-500/20 dark:bg-green-500/5">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-700 text-white">
+                  <ShieldCheck size={18} />
+                </div>
 
-    <div>
-      <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-        Admin Demo Account
-      </h3>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
-        Use these credentials to explore admin features
-      </p>
-    </div>
-  </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                    Admin Demo Account
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Use these credentials to explore admin features
+                  </p>
+                </div>
+              </div>
 
-  <div className="space-y-2">
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2.5 dark:bg-white/5">
-      <div className="min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
-          Email Address
-        </p>
-        <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-200">
-          admin@gmail.com
-        </p>
-      </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2.5 dark:bg-white/5">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                      Email Address
+                    </p>
+                    <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      admin@gmail.com
+                    </p>
+                  </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          navigator.clipboard.writeText("admin@gmail.com");
-          toast.success("Admin email copied!");
-        }}
-        className="rounded-lg p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-500/10 dark:hover:text-green-400"
-        aria-label="Copy admin email"
-      >
-        <Copy size={16} />
-      </button>
-    </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText("admin@gmail.com");
+                      toast.success("Admin email copied!");
+                    }}
+                    className="rounded-lg p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+                    aria-label="Copy admin email"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
 
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2.5 dark:bg-white/5">
-      <div>
-        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
-          Password
-        </p>
-        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-          Admin1234
-        </p>
-      </div>
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2.5 dark:bg-white/5">
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                      Password
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      Admin1234
+                    </p>
+                  </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          navigator.clipboard.writeText("Admin1234");
-          toast.success("Admin password copied!");
-        }}
-        className="rounded-lg p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-500/10 dark:hover:text-green-400"
-        aria-label="Copy admin password"
-      >
-        <Copy size={16} />
-      </button>
-    </div>
-  </div>
-</div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText("Admin1234");
+                      toast.success("Admin password copied!");
+                    }}
+                    className="rounded-lg p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+                    aria-label="Copy admin password"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
             <Link
               href="/auth/register"
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-green-200 py-3.5 text-sm font-semibold text-green-800 transition hover:bg-green-50 dark:border-green-500/20 dark:text-green-400 dark:hover:bg-green-500/10"

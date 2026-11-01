@@ -23,6 +23,10 @@ export const auth = betterAuth({
 
   trustedOrigins: [clientURL],
 
+  onAPIError: {
+    errorURL: `${clientURL}/auth/login`,
+  },
+
   user: {
     additionalFields: {
       role: {
@@ -34,9 +38,24 @@ export const auth = betterAuth({
     },
   },
 
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+      requireLocalEmailVerified: true,
+    },
+  },
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+  },
+
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
   },
 
   plugins: [
