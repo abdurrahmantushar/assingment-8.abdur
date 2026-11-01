@@ -1,5 +1,7 @@
-'use client'
 
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -11,27 +13,63 @@ import {
   HandHeart,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+
 const impactStats = [
   {
     icon: Users,
-    value: "2,500+",
+    key: "activeVolunteers",
     label: "Active Volunteers",
   },
   {
     icon: Heart,
-    value: "180+",
+    key: "communityEvents",
     label: "Community Events",
   },
   {
     icon: MapPin,
-    value: "35+",
+    key: "localCommunities",
     label: "Local Communities",
   },
 ];
 
+type Stats = {
+  activeVolunteers: number;
+  communityEvents: number;
+  localCommunities: number;
+};
+
+const initialStats: Stats = {
+  activeVolunteers: 0,
+  communityEvents: 0,
+  localCommunities: 0,
+};
 
 export default function HeroSection() {
-    const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
+  const [stats, setStats] = useState<Stats>(initialStats);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const API_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+        const response = await fetch(`${API_URL}/api/stats`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch stats");
+        }
+
+        setStats(data.stats);
+      } catch (error) {
+        console.error("Stats fetch error:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-background">
       <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
@@ -88,11 +126,11 @@ export default function HeroSection() {
               const Icon = stat.icon;
 
               return (
-                <div key={stat.label}>
+                <div key={stat.key}>
                   <div className="mb-2 flex items-center gap-2 text-primary">
                     <Icon size={17} />
                     <span className="text-lg font-extrabold text-foreground sm:text-2xl">
-                      {stat.value}
+                      {stats[stat.key as keyof Stats].toLocaleString()}+
                     </span>
                   </div>
                   <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
