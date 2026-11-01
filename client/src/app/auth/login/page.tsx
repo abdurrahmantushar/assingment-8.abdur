@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
+  Copy,
   Eye,
   EyeOff,
   Heart,
   Leaf,
   LockKeyhole,
   Mail,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -247,7 +249,70 @@ export default function LoginPage() {
 
               <div className="h-px flex-1 bg-gray-100 dark:bg-white/10" />
             </div>
+                    <div className="my-6 rounded-2xl border border-green-200 bg-green-50/80 p-4 dark:border-green-500/20 dark:bg-green-500/5">
+  <div className="mb-3 flex items-center gap-2">
+    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-700 text-white">
+      <ShieldCheck size={18} />
+    </div>
 
+    <div>
+      <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+        Admin Demo Account
+      </h3>
+      <p className="text-xs text-gray-500 dark:text-gray-400">
+        Use these credentials to explore admin features
+      </p>
+    </div>
+  </div>
+
+  <div className="space-y-2">
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2.5 dark:bg-white/5">
+      <div className="min-w-0">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
+          Email Address
+        </p>
+        <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-200">
+          admin@gmail.com
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          navigator.clipboard.writeText("admin@gmail.com");
+          toast.success("Admin email copied!");
+        }}
+        className="rounded-lg p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+        aria-label="Copy admin email"
+      >
+        <Copy size={16} />
+      </button>
+    </div>
+
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2.5 dark:bg-white/5">
+      <div>
+        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
+          Password
+        </p>
+        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Admin1234
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          navigator.clipboard.writeText("Admin1234");
+          toast.success("Admin password copied!");
+        }}
+        className="rounded-lg p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+        aria-label="Copy admin password"
+      >
+        <Copy size={16} />
+      </button>
+    </div>
+  </div>
+</div>
             <Link
               href="/auth/register"
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-green-200 py-3.5 text-sm font-semibold text-green-800 transition hover:bg-green-50 dark:border-green-500/20 dark:text-green-400 dark:hover:bg-green-500/10"
