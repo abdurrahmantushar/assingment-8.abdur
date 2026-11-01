@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -23,6 +23,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { data: session, isPending } = authClient.useSession();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -98,6 +99,19 @@ export default function RegisterPage() {
   const inputClass =
     "w-full rounded-xl border border-gray-200 bg-[#f9fbf8] py-3.5 pl-11 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 dark:border-white/10 dark:bg-[#17251a] dark:text-white dark:focus:bg-[#1b2b1f]";
 
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/");
+    }
+  }, [session, isPending, router]);
+
+  if (isPending || session?.user) {
+    return (
+      <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[#f5f8f2] dark:bg-[#0b150e]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-700 border-t-transparent" />
+      </main>
+    );
+  }
   return (
     <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[#f5f8f2] px-4 py-10 dark:bg-[#0b150e] sm:px-6">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl shadow-green-950/5 dark:border-white/10 dark:bg-[#142018] lg:grid-cols-2">
