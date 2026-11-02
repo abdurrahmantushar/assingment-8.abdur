@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -56,12 +56,31 @@ export default function Navbar() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
   const user = session?.user as NavbarUser | undefined;
   const isAdmin = user?.role === "admin";
   const isDark = theme === "dark";
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
   }, []);
 
   const isActive = (href: string) => {
@@ -98,51 +117,50 @@ export default function Navbar() {
     setProfileMenuOpen(false);
   };
 
-const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
-  <div className="space-y-1">
-    <Link
-      href="/profile"
-      onClick={onNavigate}
-      className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-    >
-      <UserRound size={18} />
-      My Profile
-    </Link>
+  const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
+    <div className="space-y-1">
+      <Link
+        href="/profile"
+        onClick={onNavigate}
+        className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <UserRound size={18} />
+        My Profile
+      </Link>
 
-    <Link
-      href="/create-event"
-      onClick={onNavigate}
-      className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-    >
-      <Plus size={18} />
-      Add Event
-    </Link>
+      <Link
+        href="/create-event"
+        onClick={onNavigate}
+        className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <Plus size={18} />
+        Add Event
+      </Link>
 
-    <Link
-      href="/manage-events"
-      onClick={onNavigate}
-      className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-    >
-      <CalendarDays size={18} />
-      Manage Events
-    </Link>
+      <Link
+        href="/manage-events"
+        onClick={onNavigate}
+        className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <CalendarDays size={18} />
+        Manage Events
+      </Link>
 
-    <Link
-      href="/joined-events"
-      onClick={onNavigate}
-      className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-    >
-      <Users size={18} />
-      Joined Events
-    </Link>
-  </div>
-);
+      <Link
+        href="/joined-events"
+        onClick={onNavigate}
+        className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <Users size={18} />
+        Joined Events
+      </Link>
+    </div>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-xl dark:border-gray-800 dark:bg-gray-950/95">
       <nav className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
         <div className="flex h-18 items-center justify-between gap-4">
-          {/* Logo */}
           <Link
             href="/"
             onClick={closeMenus}
@@ -162,7 +180,6 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden items-center gap-1 lg:flex">
             {navLinks.map((link) => {
               const active = isActive(link.href);
@@ -171,10 +188,11 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`relative rounded-lg px-3.5 py-2.5 text-sm font-medium transition ${active
+                  className={`relative rounded-lg px-3.5 py-2.5 text-sm font-medium transition ${
+                    active
                       ? "bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400"
                       : "text-gray-600 hover:bg-gray-50 hover:text-green-700 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:text-green-400"
-                    }`}
+                  }`}
                 >
                   {link.name}
                 </Link>
@@ -182,9 +200,7 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
             })}
           </div>
 
-          {/* Desktop Actions */}
           <div className="hidden items-center gap-3 lg:flex">
-            {/* Theme Toggle */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -202,20 +218,17 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
               )}
             </button>
 
-            {/* Authentication */}
             {!isPending &&
               (user ? (
                 <div className="flex items-center gap-3">
-                  {/* Profile Dropdown */}
-                  <div className="relative">
+                  <div className="relative" ref={profileMenuRef}>
                     <button
                       type="button"
-                      onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                      onClick={() => setProfileMenuOpen((prev) => !prev)}
                       aria-label="Open profile menu"
                       aria-expanded={profileMenuOpen}
                       className="flex items-center gap-2 rounded-full border border-gray-200 p-1.5 transition hover:border-green-300 dark:border-gray-700 dark:hover:border-green-700"
                     >
-                      {/* Profile Image + Hover Name */}
                       <span className="group relative flex">
                         {user.image ? (
                           <img
@@ -229,24 +242,21 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
                           </span>
                         )}
 
-                        {/* User Name Tooltip */}
                         <span className="pointer-events-none invisible absolute right-0 top-full z-[60] mt-2 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
                           {user.name}
                         </span>
                       </span>
 
-                      {/* Dropdown Icon */}
                       <ChevronDown
                         size={17}
-                        className={`text-gray-500 transition-transform ${profileMenuOpen ? "rotate-180" : ""
-                          }`}
+                        className={`text-gray-500 transition-transform ${
+                          profileMenuOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </button>
 
-                    {/* Dropdown Menu */}
                     {profileMenuOpen && (
                       <div className="absolute right-0 top-full z-50 mt-3 w-64 overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 shadow-xl shadow-gray-900/10 dark:border-gray-800 dark:bg-gray-900">
-                        {/* User Information */}
                         <div className="flex items-center gap-3 border-b border-gray-100 px-3 py-3 dark:border-gray-800">
                           {user.image ? (
                             <img
@@ -276,15 +286,15 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
                           </div>
                         </div>
 
-                        {/* Profile Links */}
                         <div className="space-y-1 py-2">
-                          <ProfileLinks />
+                          <ProfileLinks
+                            onNavigate={() => setProfileMenuOpen(false)}
+                          />
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Logout Button */}
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -306,7 +316,6 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
               ))}
           </div>
 
-          {/* Mobile Actions */}
           <div className="flex items-center gap-2 lg:hidden">
             <button
               type="button"
@@ -336,7 +345,6 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="border-t border-gray-100 py-4 dark:border-gray-800 lg:hidden">
             <div className="space-y-1">
@@ -349,10 +357,11 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
                     key={link.name}
                     href={link.href}
                     onClick={closeMenus}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${active
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+                      active
                         ? "bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400"
                         : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-900"
-                      }`}
+                    }`}
                   >
                     <Icon size={18} />
                     {link.name}
@@ -365,7 +374,6 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
               <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
                 {user ? (
                   <>
-                    {/* Mobile User Information */}
                     <div className="mb-3 flex items-center gap-3 px-3">
                       {user.image ? (
                         <img
@@ -395,12 +403,10 @@ const ProfileLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
                       </div>
                     </div>
 
-                    {/* Mobile Profile Links */}
                     <div className="space-y-1">
-                      <ProfileLinks  />
+                      <ProfileLinks onNavigate={closeMenus} />
                     </div>
 
-                    {/* Mobile Logout */}
                     <button
                       type="button"
                       onClick={handleLogout}
