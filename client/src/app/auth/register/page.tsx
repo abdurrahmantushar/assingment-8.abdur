@@ -9,6 +9,8 @@ import {
   EyeOff,
   Globe,
   Heart,
+  ImageIcon,
+  Info,
   Leaf,
   LockKeyhole,
   Mail,
@@ -30,6 +32,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    photoURL: "",
     password: "",
     confirmPassword: "",
   });
@@ -79,6 +82,7 @@ export default function RegisterPage() {
         name,
         email,
         password: formData.password,
+        image: formData.photoURL,
         callbackURL: "/",
       });
 
@@ -117,12 +121,12 @@ export default function RegisterPage() {
   const inputClass =
     "w-full rounded-xl border border-gray-200 bg-[#f9fbf8] py-3.5 pl-11 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:bg-white focus:ring-4 focus:ring-green-600/10 dark:border-white/10 dark:bg-[#17251a] dark:text-white dark:focus:bg-[#1b2b1f]";
 
-    useEffect(() => {
-      if (!isPending && session?.user) {
-        router.replace("/");
-        router.refresh();
-      }
-    }, [session, isPending, router]);
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/");
+      router.refresh();
+    }
+  }, [session, isPending, router]);
 
   if (isPending || session?.user) {
     return (
@@ -345,6 +349,41 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="photoURL"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-200"
+                >
+                  Profile Photo URL
+                </label>
+
+                <div className="group relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                    <ImageIcon className="h-5 w-5 text-gray-400 transition-colors group-focus-within:text-primary" />
+                  </div>
+
+                  <input
+                    id="photoURL"
+                    type="url"
+                    placeholder="https://example.com/profile.jpg"
+                    value={formData.photoURL}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        photoURL: e.target.value,
+                      })
+                    }
+                    required
+                    className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-12 pr-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:bg-gray-800"
+                  />
+                </div>
+
+                <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  <Info className="h-3.5 w-3.5" />
+                  Add a publicly accessible image URL for your profile.
+                </p>
               </div>
 
               <label className="flex items-start gap-2 text-xs leading-5 text-gray-500 dark:text-gray-400">

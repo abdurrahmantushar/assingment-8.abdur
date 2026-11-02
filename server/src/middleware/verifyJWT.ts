@@ -64,10 +64,17 @@ export const verifyJWT = async (
     };
 
     next();
-  } catch {
-    res.status(401).json({
-      success: false,
-      message: "Invalid or expired token",
-    });
+} catch (error) {
+  console.error("JWT Verification Error:", error);
+
+  if (error instanceof Error) {
+    console.error("Error Name:", error.name);
+    console.error("Error Message:", error.message);
   }
+
+  res.status(401).json({
+    success: false,
+    message: "Invalid or expired token",
+  });
+}
 };
