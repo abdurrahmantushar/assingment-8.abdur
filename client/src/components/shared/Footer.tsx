@@ -19,7 +19,6 @@ const quickLinks = [
   { label: "Home", href: "/" },
   { label: "Upcoming Events", href: "/upcoming-events" },
   { label: "Create Event", href: "/create-event" },
-  { label: "About Us", href: "/about" },
 ];
 
 const accountLinks = [

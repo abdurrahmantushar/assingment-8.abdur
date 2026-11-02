@@ -7,6 +7,10 @@ const secret = process.env.BETTER_AUTH_SECRET;
 const baseURL = process.env.BETTER_AUTH_URL;
 const clientURL = process.env.CLIENT_URL || "http://localhost:3000";
 
+if (!clientURL) {
+  throw new Error("CLIENT_URL is not defined");
+}
+
 if (!secret || secret.length < 32) {
   throw new Error("BETTER_AUTH_SECRET must be at least 32 characters");
 }
@@ -21,7 +25,10 @@ export const auth = betterAuth({
   baseURL,
   secret,
 
-  trustedOrigins: [clientURL],
+  trustedOrigins: [
+    clientURL,
+    "http://localhost:3000",
+  ],
 
   onAPIError: {
     errorURL: `${clientURL}/auth/login`,
