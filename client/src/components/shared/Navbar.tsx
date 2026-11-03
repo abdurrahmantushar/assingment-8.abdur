@@ -134,7 +134,7 @@ export default function Navbar() {
         className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
       >
         <Plus size={18} />
-        Add Event
+        Create Event
       </Link>
 
       <Link
